@@ -57,21 +57,15 @@ void convexHull(Point points[], int n)
            if (orientation(points[p], points[i], points[q]) == 2) 
                q = i; 
         } 
-  
-        // Now q is the most counterclockwise with respect to p 
-        // Set p as q for next iteration, so that q is added to 
-        // result 'hull' 
         p = q; 
   
-    } while (p != l);  // While we don't come to first point 
+    }while (p != l); 
   
-    // Print Result 
     for (int i = 0; i < hull.size(); i++) 
         cout << "(" << hull[i].x << ", "
               << hull[i].y << ")\n"; 
 } 
   
-// Driver program to test above functions 
 int main() 
 { 
     Point points[] = {{0, 3}, {2, 2}, {1, 1}, {2, 1}, 
