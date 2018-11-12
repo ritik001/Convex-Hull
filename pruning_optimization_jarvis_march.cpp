@@ -16,17 +16,22 @@ struct Point
 
 Point p0;
 
-int distance_square(Point, Point);
-int swap(Point &p1, Point &p2);
-stack<Point> convexHull(Point points[], int);
-Point adjacent_to_top(stack<Point> &S);
-int comparator_to_sort(const void *, const void *);
+int orientation(Point, Point, Point);
 
-int lineDist(Point, Point, Point);
-int findSide(Point, Point, Point);
-int quickHull(int, Point, Point, int,Point points[]);
-bool isInside(Point polygon[], int, Point);
 stack<Point> prune(Point points[], int n);
+
+int quickHull(int, Point, Point, int, Point points[]);
+int find_side(Point, Point, Point);
+int line_distance(Point, Point, Point);
+bool onSegment(Point, Point, Point);
+bool doIntersect(Point, Point, Point, Point);
+bool is_inside_polygon(Point polygon[], int, Point);
+
+int comparator_to_sort(const void *, const void *);
+Point adjacent_to_top(stack<Point> &S);
+stack<Point> convexHull(Point points[], int);
+int swap(Point &p1, Point &p2);
+int distance_square(Point, Point);
 
 int orientation(Point p1, Point p2, Point p3)
 {
@@ -38,6 +43,8 @@ int orientation(Point p1, Point p2, Point p3)
     else
         return 2;
 }
+
+/* ############################################################################################################################# */
 
 stack<Point> prune(Point points[], int n)
 {
@@ -74,16 +81,17 @@ stack<Point> prune(Point points[], int n)
     int ind1 = -1;
     int ind2 = -1;
 
+    /*
     cout << "Xmin " << points[min_x].x << " " << points[min_x].y << "\n";
     cout << "Xmax " << points[max_x].x << " " << points[max_x].y << "\n";
     cout << "Ymin " << points[min_y].x << " " << points[min_y].y << "\n";
     cout << "Ymax " << points[max_y].x << " " << points[max_y].y << "\n";
-
+*/
 
     if (points[min_x].x == points[min_y].x && points[max_x].x == points[max_y].x && points[min_x].y == points[min_y].y && points[max_x].y == points[max_y].y)
     {
-        ind1 = quickHull(n, points[min_x], points[max_x], 1,points);
-        ind2 = quickHull(n, points[min_x], points[max_x], -1,points);
+        ind1 = quickHull(n, points[min_x], points[max_x], 1, points);
+        ind2 = quickHull(n, points[min_x], points[max_x], -1, points);
     }
     else
     {
@@ -95,12 +103,16 @@ stack<Point> prune(Point points[], int n)
         p4 = points[ind2];
     if (ind1 != -1)
     {
-        /*         cout << "New Point " << p3.x << " " << p3.y << "\n"; */
+        /*         
+    cout << "New Point " << p3.x << " " << p3.y << "\n";
+*/
     }
 
     if (ind2 != -1)
     {
-        /*         cout << "New Point " << p4.x << " " << p4.y << "\n"; */
+        /*
+    cout << "New Point " << p4.x << " " << p4.y << "\n";
+*/
     }
 
     Point polygon1[4];
@@ -119,9 +131,9 @@ stack<Point> prune(Point points[], int n)
     {
         S.push(points[min_x]);
         S.push(points[max_x]);
-        if(ind1!=-1)
+        if (ind1 != -1)
             S.push(p3);
-        if(ind2!=-1)
+        if (ind2 != -1)
             S.push(p4);
         return S;
     }
@@ -136,7 +148,7 @@ stack<Point> prune(Point points[], int n)
         }
         else
         {
-            if (isInside(polygon1, 4, points[i]))
+            if (is_inside_polygon(polygon1, 4, points[i]))
             {
             }
             else
@@ -150,15 +162,17 @@ stack<Point> prune(Point points[], int n)
     return S;
 }
 
-int quickHull(int n, Point p1, Point p2, int side,Point points[])
+/* ############################################################################################################################# */
+
+int quickHull(int n, Point p1, Point p2, int side, Point points[])
 {
     int ind = -1;
     int max_dist = 0;
 
     for (int i = 0; i < n; i++)
     {
-        int temp = lineDist(p1, p2, points[i]);
-        if (findSide(p1, p2, points[i]) == side && temp > max_dist)
+        int temp = line_distance(p1, p2, points[i]);
+        if (find_side(p1, p2, points[i]) == side && temp > max_dist)
         {
             ind = i;
             max_dist = temp;
@@ -168,7 +182,7 @@ int quickHull(int n, Point p1, Point p2, int side,Point points[])
     return ind;
 }
 
-int findSide(Point p1, Point p2, Point p)
+int find_side(Point p1, Point p2, Point p)
 {
     int val = (p.y - p1.y) * (p2.x - p1.x) -
               (p2.y - p1.y) * (p.x - p1.x);
@@ -180,7 +194,7 @@ int findSide(Point p1, Point p2, Point p)
     return 0;
 }
 
-int lineDist(Point p1, Point p2, Point p)
+int line_distance(Point p1, Point p2, Point p)
 {
     return abs((p.y - p1.y) * (p2.x - p1.x) -
                (p2.y - p1.y) * (p.x - p1.x));
@@ -216,7 +230,7 @@ bool doIntersect(Point p1, Point q1, Point p2, Point q2)
     return false;
 }
 
-bool isInside(Point polygon[], int n, Point p)
+bool is_inside_polygon(Point polygon[], int n, Point p)
 {
     if (n < 3)
         return false;
@@ -229,7 +243,6 @@ bool isInside(Point polygon[], int n, Point p)
         {
             if (orientation(polygon[i], p, polygon[next]) == 0)
                 return onSegment(polygon[i], p, polygon[next]);
-
             count++;
         }
         i = next;
@@ -237,157 +250,106 @@ bool isInside(Point polygon[], int n, Point p)
     return count & 1;
 }
 
-int comparator_to_sort(const void *vp1, const void *vp2)
-{
-    Point *p1 = (Point *)vp1;
-    Point *p2 = (Point *)vp2;
-    int o = orientation(p0, *p1, *p2);
-    if (o == 0)
-    {
-        if (distance_square(p0, *p2) >= distance_square(p0, *p1))
-            return -1;
-        else
-            return 1;
-    }
-    else if (o == 1)
-        return 1;
-    else
-        return 0;
-}
-
-Point adjacent_to_top(stack<Point> &S)
-{
-    Point p = S.top();
-    S.pop();
-    Point res = S.top();
-    S.push(p);
-    return res;
-}
+/* ############################################################################################################################# */
 
 stack<Point> convexHull(Point points[], int n)
 {
-    int ymin = points[0].y;
-    int min = 0;
+    stack<Point> chull;
+    if (n < 3)
+        return chull;
+
+    int leftmost = 0;
     for (int i = 1; i < n; i++)
+        if (points[i].x < points[leftmost].x)
+            leftmost = i;
+
+    int p = leftmost;
+    int next;
+    do
     {
-        int y = points[i].y;
+        chull.push(points[p]);
+        next = (p + 1) % n;
+        for (int i = 0; i < n; i++)
+        {
+            if (orientation(points[p], points[i], points[next]) == 2)
+                next = i;
+        }
+        p = next;
 
-        if ((y < ymin) || (ymin == y && points[i].x < points[min].x))
-            ymin = points[i].y, min = i;
-    }
+    } while (p != leftmost);
 
-    swap(points[0], points[min]);
-    p0 = points[0];
-    qsort(&points[1], n - 1, sizeof(Point), comparator_to_sort);
-
-    int m = 1;
-    for (int i = 1; i < n; i++)
-    {
-        while (i < n - 1 && orientation(p0, points[i], points[i + 1]) == 0)
-            i++;
-        points[m] = points[i];
-        m++;
-    }
-    stack<Point> S;
-    if (m < 3)
-        return S;
-    S.push(points[0]);
-    S.push(points[1]);
-    S.push(points[2]);
-
-    for (int i = 3; i < m; i++)
-    {
-        while (orientation(adjacent_to_top(S), S.top(), points[i]) != 2)
-            S.pop();
-        S.push(points[i]);
-    }
-    return S;
+    return chull;
 }
 
-int swap(Point &p1, Point &p2)
-{
-    Point temp = p1;
-    p1 = p2;
-    p2 = temp;
-}
-
-int distance_square(Point p1, Point p2)
-{
-    return pow(p1.x - p2.x, 2) + pow(p1.y - p2.y, 2);
-}
+/* ############################################################################################################################# */
 
 int main()
 {
-    int n=150000;
+
+    //   Testing
+
+    /*     int n=40000;
     int a, b;
     Point points[n];
     for (int i = 0; i < n; i++)
     {
-        a=rand()%10000;
-        b=rand()%10000;
+        a=rand()%40000;
+        b=rand()%40000;
+        points[i].x = a;
+        points[i].y = b;
+    } */
+
+    int n;
+    int a, b;
+    cout << "Enter the number of points \n";
+    cin >> n;
+    Point points[n];
+    cout << "Enter x and y co-ordinate for n Points\n";
+    for (int i = 0; i < n; i++)
+    {
+        cin >> a;
+        cin >> b;
         points[i].x = a;
         points[i].y = b;
     }
 
+    stack<Point> S;
     clock_t start, end;
     double time_taken;
+    S = prune(points, n);
     start = clock();
-    stack<Point> S=convexHull(points,n);
-    cout << "\n";
-    if(S.size()!=0)
+    if (S.size() <= 4)
     {
-        while (!S.empty()) 
-        { 
-        Point p = S.top(); 
-        cout << "(" << p.x << ", " << p.y <<")" << endl; 
-        S.pop(); 
-        } 
     }
-    else
-        cout << "Less than three points in different orientaion.So convex hull is not possible \n";
-    end = clock();
-    time_taken = ((double) (end - start)) / CLOCKS_PER_SEC;
-    cout << "Time " << time_taken << "\n";
-
-    start = clock();
-    S = prune(points,n);
-    if(S.size()<=4)
-    {}
     else
     {
         Point pruned_points[S.size()];
-        int size=S.size();
+        int size = S.size();
         int i;
-/*         cout << "size " << S.size() << "\n"; */
-        for(i=0;i<size;i++)
+        /*
+        cout << "size " << S.size() << "\n";
+*/
+        for (i = 0; i < size; i++)
         {
-            pruned_points[i]=S.top();
+            pruned_points[i] = S.top();
             S.pop();
         }
-        S = convexHull(pruned_points,size);
+        S = convexHull(pruned_points, size);
     }
 
     cout << "Final Convex Hull Output \n";
-    if(S.size()!=0)
+    if (S.size() != 0)
     {
-        while (!S.empty()) 
-        { 
-        Point p = S.top(); 
-        cout << "(" << p.x << ", " << p.y <<")" << endl; 
-        S.pop(); 
-        } 
+        while (!S.empty())
+        {
+            Point p = S.top();
+            cout << "(" << p.x << ", " << p.y << ")" << endl;
+            S.pop();
+        }
     }
     else
         cout << "Less than three points in different orientaion.So convex hull is not possible \n";
     end = clock();
-    time_taken = ((double) (end - start)) / CLOCKS_PER_SEC;
+    time_taken = ((double)(end - start)) / CLOCKS_PER_SEC;
     cout << "Time " << time_taken << "\n";
 }
-
-
-/* 
-cout << "Xmin " << polygon1[0].x << " " << polygon1[0].y << "\n";
-cout << "Xmax " << polygon1[1].x << " " << polygon1[1].y << "\n";
-cout << "Ymin " << polygon1[2].x << " " << polygon1[2].y << "\n";
-cout << "Ymin " << polygon1[3].x << " " << polygon1[3].y << "\n"; 
-*/

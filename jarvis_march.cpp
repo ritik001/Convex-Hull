@@ -62,7 +62,7 @@ void convexHull(Point points[], int n)
 
 int main()
 {
-    int n;
+/*     int n;
     int a, b;
     cout << "Enter the number of points \n";
     cin >> n;
@@ -74,7 +74,25 @@ int main()
         cin >> b;
         points[i].x = a;
         points[i].y = b;
+    } */
+        int n=40000;
+    int a, b;
+    Point points[n];
+    for (int i = 0; i < n; i++)
+    {
+        a=rand()%40000;
+        b=rand()%40000;
+        points[i].x = a;
+        points[i].y = b;
     }
+
+    stack<Point> S;
+    clock_t start, end;
+    double time_taken;
+    start = clock();
     convexHull(points, n);
+    end = clock();
+    time_taken = ((double)(end - start)) / CLOCKS_PER_SEC;
+    cout << "Time " << time_taken << "\n";
     return 0;
 }

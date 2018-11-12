@@ -338,7 +338,7 @@ int main()
 
     //   Testing
 
-    /*     int n=40000;
+/*         int n=40000;
     int a, b;
     Point points[n];
     for (int i = 0; i < n; i++)
